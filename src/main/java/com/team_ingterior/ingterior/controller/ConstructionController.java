@@ -6,17 +6,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.Response;
 import com.team_ingterior.ingterior.DTO.construction.ConstructionsResponseDTO;
-import com.team_ingterior.ingterior.DTO.construction.DeleteConstructionDTO;
+import com.team_ingterior.ingterior.DTO.construction.DeleteConstructionRequestDTO;
 import com.team_ingterior.ingterior.DTO.construction.InsertConstructionRequestDTO;
-import com.team_ingterior.ingterior.DTO.construction.JoinConstructionDTO;
 import com.team_ingterior.ingterior.DTO.construction.JoinConstructionRequestDTO;
-import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionDTO;
+import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionRequestDTO;
+import com.team_ingterior.ingterior.DTO.construction.LikeConstructionRequestDTO;
 import com.team_ingterior.ingterior.service.ConstructionService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,9 +38,15 @@ public class ConstructionController {
     private final ConstructionService constructionService;
 
     @PostMapping(value = "construction", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> insertConstruction(@ModelAttribute InsertConstructionRequestDTO construction, 
-        @RequestPart(required = false) MultipartFile file) {
-        constructionService.insertConstruction(construction, file);
+    public ResponseEntity<Void> insertConstruction(@RequestParam int memberId, @RequestParam int usage
+    , @RequestParam String constructionName, @RequestPart(required = false) MultipartFile file) {
+        constructionService.insertConstruction(
+            InsertConstructionRequestDTO.builder()
+            .memberId(memberId)
+            .constructionName(constructionName)
+            .usage(usage)
+            .build()
+        , file);
         return ResponseEntity.ok().build();
     }
 
@@ -59,7 +63,8 @@ public class ConstructionController {
     }
 
     @DeleteMapping("construction")
-    public ResponseEntity<Void> deleteConstruction(@RequestBody DeleteConstructionDTO construction) {
+    public ResponseEntity<Void> deleteConstruction(@RequestBody DeleteConstructionRequestDTO construction) {
+        constructionService.deleteConstruction(construction);
         return ResponseEntity.ok().build();
     }
 
@@ -70,14 +75,16 @@ public class ConstructionController {
     }
 
     @DeleteMapping("construction/leave")
-    public ResponseEntity<Void> leaveConstruction(@RequestBody LeaveConstructionDTO leave) {
+    public ResponseEntity<Void> leaveConstruction(@RequestBody LeaveConstructionRequestDTO leave) {
         constructionService.leaveConstruction(leave);        
         return ResponseEntity.ok().build();
     }
-    
-    
-    
 
+    @PostMapping("construction/like")
+    public ResponseEntity<Void> postMethodName(@RequestBody LikeConstructionRequestDTO likeDTO) {
+        constructionService.likeConstructionToggle(likeDTO);
+        return ResponseEntity.ok().build();
+    }
     
     
     

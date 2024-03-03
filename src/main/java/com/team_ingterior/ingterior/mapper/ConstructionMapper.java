@@ -8,7 +8,8 @@ import com.team_ingterior.ingterior.DTO.construction.ConstructionResponseDTO;
 import com.team_ingterior.ingterior.DTO.construction.ConstructionsResponseDTO;
 import com.team_ingterior.ingterior.DTO.construction.InsertConstructionDTO;
 import com.team_ingterior.ingterior.DTO.construction.JoinConstructionDTO;
-import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionDTO;
+import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionRequestDTO;
+import com.team_ingterior.ingterior.DTO.construction.LikeConstructionRequestDTO;
 
 @Mapper
 public interface ConstructionMapper {
@@ -17,6 +18,7 @@ public interface ConstructionMapper {
     List<ConstructionsResponseDTO> getConsturctionsByMemberId(int memberId);
     int deleteConstruction(int constructionId);
     void joinConstruction(JoinConstructionDTO join);
-    void leaveConstruction(LeaveConstructionDTO leave);
+    void leaveConstruction(LeaveConstructionRequestDTO leave);
     ConstructionResponseDTO getConstuctionByConstructionId(int consructionId);
+    void likeConstructionToggle(LikeConstructionRequestDTO dto);
 }

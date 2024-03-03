@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class JoinConstructionRequestDTO {
+public class LikeConstructionRequestDTO {
     private Integer memberId;
     private Integer constructionId;
 }

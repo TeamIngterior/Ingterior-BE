@@ -59,11 +59,11 @@
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
     </select>
 
-    <select id="deleteConstruction" parameterType="integer" resultType="integer">
+    <update id="deleteConstruction" parameterType="integer">
         UPDATE construction SET
             status = 0
         WHERE construction_id = #{constructionId}
-    </select>
+    </update>
 
 
     <select id="joinConstruction" parameterType="joinConstructionDTO">
@@ -82,7 +82,7 @@
             ,0
     </select>
 
-    <select id="leaveConstruction" parameterType="leaveConstructionDTO">
+    <select id="leaveConstruction" parameterType="leaveConstructionRequestDTO">
         DELETE FROM construction_entry
         WHERE construction_id = #{constructionId}
         AND member_id = #{memberId}
@@ -102,5 +102,15 @@
             construction
         WHERE construction_id = #{constructionId}
         AND status = 1
+    </select>
+
+    <select id="likeConstructionToggle"  parameterType="likeConstructionRequestDTO">
+        UPDATE construction_entry SET 
+            liked = CASE
+                        WHEN liked = 1 THEN 0
+                        ELSE 1
+                    END
+        WHERE construction_id = #{constructionId}
+        AND member_id = #{memberId}
     </select>
 </mapper>

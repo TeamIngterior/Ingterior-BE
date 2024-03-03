@@ -8,12 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.team_ingterior.ingterior.DTO.construction.ConstructionsResponseDTO;
-import com.team_ingterior.ingterior.DTO.construction.DeleteConstructionDTO;
+import com.team_ingterior.ingterior.DTO.construction.DeleteConstructionRequestDTO;
 import com.team_ingterior.ingterior.DTO.construction.InsertConstructionDTO;
 import com.team_ingterior.ingterior.DTO.construction.InsertConstructionRequestDTO;
 import com.team_ingterior.ingterior.DTO.construction.JoinConstructionDTO;
 import com.team_ingterior.ingterior.DTO.construction.JoinConstructionRequestDTO;
-import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionDTO;
+import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionRequestDTO;
+import com.team_ingterior.ingterior.DTO.construction.LikeConstructionRequestDTO;
 import com.team_ingterior.ingterior.DTO.member.MemberResourceResponseDTO;
 import com.team_ingterior.ingterior.mapper.ConstructionMapper;
 import com.team_ingterior.ingterior.util.CodeGenerator;
@@ -72,7 +73,7 @@ public class ConstructionService {
 
 
     @Transactional
-    public int deleteConstruction(DeleteConstructionDTO construction){
+    public int deleteConstruction(DeleteConstructionRequestDTO construction){
         int consructionId = construction.getConstructionId();
         int memberId = construction.getMemberId();
 
@@ -95,8 +96,13 @@ public class ConstructionService {
     }
 
     @Transactional
-    public void leaveConstruction(LeaveConstructionDTO leave){
+    public void leaveConstruction(LeaveConstructionRequestDTO leave){
         constructionMapper.leaveConstruction(leave);
+    }
+
+    @Transactional
+    public void likeConstructionToggle(LikeConstructionRequestDTO likeDTO){
+        constructionMapper.likeConstructionToggle(likeDTO);
     }
 
 }
