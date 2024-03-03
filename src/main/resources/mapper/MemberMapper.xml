@@ -1,0 +1,19 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team_ingterior.ingterior.mapper.MemberMapper">
+    
+    <select id="getMemberResourceByMemberId" parameterType="integer" resultType="memberResourceResponseDTO">
+        SELECT
+            m.member_code                       AS memberCode
+            ,m.status = 2                       AS isSubscribed
+            ,count(c.construction_id)           AS constructionCount
+        FROM member m
+        LEFT JOIN construction c on m.member_id = c.creator_id
+        WHERE m.member_id = #{memberId}
+        And m.status != 0
+        GROUP BY 1,2
+    </select>
+
+</mapper>

@@ -1,0 +1,106 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team_ingterior.ingterior.mapper.ConstructionMapper">
+    
+    <select id="insertConstruction" parameterType="insertConstructionDTO" resultType="integer">
+        INSERT INTO construction(
+            construction_id
+            ,drawing_image_url
+            ,usage
+            ,name
+            ,code
+            ,creator_id
+            ,reg_date
+            ,status
+        )
+        SELECT
+            nextval('construction_id_seq')
+            ,#{path}
+            ,#{usage}
+            ,#{constructionName}
+            ,#{constructionCode}
+            ,#{memberId}
+            ,now()
+            ,1
+        RETURNING construction_id
+    </select>
+
+    <select id="getConsturctionsByMemberId" parameterType="integer" resultType="constructionsResponseDTO">
+        WITH target AS (
+            SELECT 
+                c.construction_id,
+                c.usage,
+                c.name,
+                c.code,
+                m.member_code,
+                (ce.liked = 1) as isLiked,
+                (m.member_id = #{memberId}) AS isCreator,
+                c.reg_date                
+            FROM construction_entry ce
+            JOIN construction c ON c.construction_id = ce.construction_id AND c.status = 1
+            JOIN member m ON c.creator_id = m.member_id
+            WHERE ce.member_id = #{memberId}
+        )
+        SELECT
+            t.construction_id               AS constructionId
+            ,t.usage                        AS usage
+            ,t.name                         AS constructionName
+            ,t.code                         AS constructionCode
+            ,t.member_code                  AS memberCode
+            ,t.isLiked                      AS isLiked
+            ,t.isCreator                    AS isCreator
+            ,t.reg_date                     AS regDate
+            ,ARRAY_AGG(m.img_url)           AS memberImgUrls
+        FROM target t
+        JOIN construction_entry ce ON t.construction_id = ce.construction_id
+        LEFT JOIN member m ON ce.member_id = m.member_id AND m.status = 1
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
+    </select>
+
+    <select id="deleteConstruction" parameterType="integer" resultType="integer">
+        UPDATE construction SET
+            status = 0
+        WHERE construction_id = #{constructionId}
+    </select>
+
+
+    <select id="joinConstruction" parameterType="joinConstructionDTO">
+        INSERT INTO construction_entry(
+            construction_entry_id
+            ,construction_id
+            ,member_id
+            ,permission
+            ,liked
+        )
+        SELECT
+            nextval('construction_entry_id_seq')
+            ,#{constructionId}
+            ,#{memberId}
+            ,#{permission}
+            ,0
+    </select>
+
+    <select id="leaveConstruction" parameterType="leaveConstructionDTO">
+        DELETE FROM construction_entry
+        WHERE construction_id = #{constructionId}
+        AND member_id = #{memberId}
+    </select>
+
+    <select id="getConstuctionByConstructionId" parameterType="integer" resultType="constructionResponseDTO">
+        SELECT
+            construction_id         AS constructionId
+            ,drawing_image_url      AS drawingImageUrl
+            ,usage                  AS usage
+            ,name                   AS name
+            ,code                   AS code
+            ,creator_id             AS creatorId
+            ,reg_date               AS regDate
+            ,updt_date              AS updtDate
+        FROM 
+            construction
+        WHERE construction_id = #{constructionId}
+        AND status = 1
+    </select>
+</mapper>

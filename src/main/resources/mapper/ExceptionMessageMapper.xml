@@ -1,0 +1,21 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team_ingterior.ingterior.mapper.ExceptionMessageMapper">
+    
+    <select id="getExceptionMessageByCode" parameterType="String" resultType="exceptionMessageDTO">
+        SELECT
+            code
+            ,dev_message
+            ,user_message
+            ,status_code
+        FROM
+            exception_message
+        WHERE
+            code = #{code}
+    </select>
+
+
+
+</mapper>
