@@ -42,6 +42,7 @@
             JOIN construction c ON c.construction_id = ce.construction_id AND c.status = 1
             JOIN member m ON c.creator_id = m.member_id
             WHERE ce.member_id = #{memberId}
+            AND c.status = 1
         )
         SELECT
             t.construction_id               AS constructionId
@@ -59,12 +60,21 @@
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
     </select>
 
+    <update id="updateConstruction" parameterType="updateConstructionDTO">
+        UPDATE construction SET
+            drawing_image_url = #{path}
+            ,usage = #{usage}
+            ,name = #{name}
+            ,updt_date = now()
+        WHERE construction_id = #{constructionId}
+        AND status = 1
+    </update>
+
     <update id="deleteConstruction" parameterType="integer">
         UPDATE construction SET
             status = 0
         WHERE construction_id = #{constructionId}
     </update>
-
 
     <select id="joinConstruction" parameterType="joinConstructionDTO">
         INSERT INTO construction_entry(
@@ -113,4 +123,13 @@
         WHERE construction_id = #{constructionId}
         AND member_id = #{memberId}
     </select>
+
+    <select id="updatePermission" parameterType="updatePermissionRequestDTO">
+        UPDATE construction_entry SET
+            permission = #{permission}
+        WHERE construction_id = #{constructionId}
+        AND member_id = #{targetMemberId}
+    </select>
+
+    
 </mapper>

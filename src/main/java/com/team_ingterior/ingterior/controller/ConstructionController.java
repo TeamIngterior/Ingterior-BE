@@ -15,6 +15,8 @@ import com.team_ingterior.ingterior.DTO.construction.InsertConstructionRequestDT
 import com.team_ingterior.ingterior.DTO.construction.JoinConstructionRequestDTO;
 import com.team_ingterior.ingterior.DTO.construction.LeaveConstructionRequestDTO;
 import com.team_ingterior.ingterior.DTO.construction.LikeConstructionRequestDTO;
+import com.team_ingterior.ingterior.DTO.construction.UpdateConstructionRequestDTO;
+import com.team_ingterior.ingterior.DTO.construction.UpdatePermissionRequestDTO;
 import com.team_ingterior.ingterior.service.ConstructionService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 
@@ -55,11 +58,18 @@ public class ConstructionController {
         return ResponseEntity.ok().body(constructionService.getConsturctionsByMemberId(memberId));
     }
     
-    @PutMapping("construction")
-    public String updateConstruction(@PathVariable String id, @RequestBody String entity) {
-        //TODO: process PUT request
-        
-        return entity;
+    @PutMapping(value = "construction", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<Void> updateConstruction(@RequestParam int memberId, @RequestParam int constructionId
+    ,@RequestParam String constructionName,@RequestParam int usage, @RequestPart(required = false) MultipartFile file) {
+        constructionService.updateConstruction(
+            UpdateConstructionRequestDTO.builder()
+            .memberId(memberId)
+            .constructionId(constructionId)
+            .usage(usage)
+            .constructionName(constructionName)
+            .build()
+        ,file);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("construction")
@@ -85,7 +95,12 @@ public class ConstructionController {
         constructionService.likeConstructionToggle(likeDTO);
         return ResponseEntity.ok().build();
     }
-    
+
+    @PutMapping("construction/permission")
+    public ResponseEntity<Void> putMethodName(@RequestBody UpdatePermissionRequestDTO permissionDTO) {
+        constructionService.updatePermission(permissionDTO);
+        return ResponseEntity.ok().build();
+    }
     
     
     

@@ -4,9 +4,9 @@ package com.team_ingterior.ingterior.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.team_ingterior.ingterior.util.exception.DynamicException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,14 +30,13 @@ public class AwsService {
             objectmetadata.setContentType(file.getContentType());
             objectmetadata.setContentLength(file.getBytes().length);
 
-            System.out.println(fullPath+ file.getOriginalFilename());
             s3Client.putObject(new PutObjectRequest(bucket, fullPath, file.getInputStream(), objectmetadata)
                     //.withCannedAcl(CannedAccessControlList.PublicRead)
                     .withMetadata(objectmetadata));
-                    
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
+            throw new DynamicException("파일 업로드 실패");
         }
     }
 
@@ -45,8 +44,14 @@ public class AwsService {
         try {
             s3Client.deleteObject(bucket, fullPath);
         }catch (Exception e){
-            System.err.println(e.getMessage());
+            e.printStackTrace();
+            throw new DynamicException("파일 삭제 실패");
         }
+    }
+
+    public void replaceFile(String beforePath, String afterPath, MultipartFile file){
+        this.uploadFile(afterPath, file);
+        this.deleteFile(beforePath);
     }
 
     
