@@ -17,11 +17,14 @@ public class SecurityConfig{
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .cors().disable()
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
             .authorizeHttpRequests(request -> request
                 .anyRequest().permitAll());
-            //.addFilterBefore(new JwtTokenFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+            
+            
+            
+                        //.addFilterBefore(new JwtTokenFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
         return http.build();	// 어떠한 요청이라도 인증필요
 
     }   
