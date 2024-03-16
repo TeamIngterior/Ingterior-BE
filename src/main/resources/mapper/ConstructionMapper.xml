@@ -2,7 +2,7 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.team_ingterior.ingterior.mapper.ConstructionMapper">
+<mapper namespace="com.team_ingterior.ingterior.construction.mapper.ConstructionMapper">
     
     <select id="insertConstruction" parameterType="insertConstructionDTO" resultType="integer">
         INSERT INTO construction(
