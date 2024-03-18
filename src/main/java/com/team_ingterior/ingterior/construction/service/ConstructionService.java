@@ -1,5 +1,6 @@
 package com.team_ingterior.ingterior.construction.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,7 @@ import com.team_ingterior.ingterior.construction.domain.UpdateConstructionDTO;
 import com.team_ingterior.ingterior.construction.domain.UpdateConstructionRequestDTO;
 import com.team_ingterior.ingterior.construction.domain.UpdatePermissionRequestDTO;
 import com.team_ingterior.ingterior.construction.mapper.ConstructionMapper;
-import com.team_ingterior.ingterior.member.domain.MemberResourceResponseDTO;
+import com.team_ingterior.ingterior.member.domain.MemberThumnailResponseDTO;
 import com.team_ingterior.ingterior.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,16 +34,12 @@ import lombok.RequiredArgsConstructor;
 public class ConstructionService {
     private final ConstructionMapper constructionMapper;
     private final MemberService memberService;
-    private final AwsService awsService;
-    @Value("${cloud.aws.s3.construction_dir}")
-    private String constructionDir;
+    private final CodeGenerator codeGenerator;
     
     @Transactional
-    public void insertConstruction(InsertConstructionRequestDTO construction, MultipartFile file){
+    public int insertConstruction(InsertConstructionRequestDTO construction){
         int memberId = construction.getMemberId();
-        MemberResourceResponseDTO codeResource = memberService.getMemberResourceByMemberId(memberId);
-        String constructionCode = CodeGenerator.generateConstructionCode(codeResource);
-        String path = null;
+        String constructionCode = codeGenerator.generateConstructionCode(memberId);
         
         InsertConstructionDTO dto = InsertConstructionDTO.builder()
             .constructionName(construction.getConstructionName())
@@ -51,25 +48,17 @@ public class ConstructionService {
             .usage(construction.getUsage())
             .build();
         
-
-        if(file != null){
-            String fileName = file.getOriginalFilename();
-            path = constructionDir+"/"+constructionCode+"/"+fileName;
-
-            dto.setPath(path);
-        }
-        
         int constructionId = constructionMapper.insertConstruction(dto);
-        constructionMapper.joinConstruction(JoinConstructionDTO.builder()
-            .constructionId(constructionId)
-            .memberId(memberId)
-            .permission("creator")
-            .build()
+
+        constructionMapper.joinConstruction(
+            JoinConstructionDTO.builder()
+                .constructionId(constructionId)
+                .memberId(memberId)
+                .permission(ConstructionPermissionEnum.ADMIN)
+                .build()
         );
 
-        if(file != null){
-            awsService.uploadFile(path, file);
-        }
+        return constructionId;
 
     }
 
@@ -78,20 +67,23 @@ public class ConstructionService {
         return constructionMapper.getConsturctionsByMemberId(memberId);
     }
 
+    public ConstructionResponseDTO getConstructionByConstructionId(int constructionId){
+        ConstructionResponseDTO construction = constructionMapper.getConstructionByConstructionId(constructionId);
+        construction.setMemberThumnails(constructionMapper.getMemberThumnailsByConstructionId(constructionId));
+
+        return construction;
+    }
+
     @Transactional
-    public void updateConstruction(UpdateConstructionRequestDTO construction, MultipartFile file){
+    public void updateConstruction(UpdateConstructionRequestDTO construction){
         int memberId = construction.getMemberId();
 
         int constructionId = construction.getConstructionId();
         int usage = construction.getUsage();
-        ConstructionResponseDTO targetConstruction = constructionMapper.getConstuctionByConstructionId(construction.getConstructionId());
+        ConstructionResponseDTO targetConstruction = constructionMapper.getConstructionByConstructionId(construction.getConstructionId());
         String constructionName = construction.getConstructionName();
         String path = targetConstruction.getDrawingImageUrl();
 
-        if(file != null){
-            String fileName = file.getOriginalFilename();
-            path = constructionDir+"/"+targetConstruction.getCode()+"/"+fileName;
-        }
 
         constructionMapper.updateConstruction(
             UpdateConstructionDTO.builder()
@@ -102,11 +94,6 @@ public class ConstructionService {
             .build()
         );
 
-        if(file != null){
-            awsService.replaceFile(targetConstruction.getDrawingImageUrl() , path, file);
-        }
-
-        
 
     }
 
@@ -129,7 +116,7 @@ public class ConstructionService {
             JoinConstructionDTO.builder()
                 .constructionId(join.getConstructionId())
                 .memberId(join.getMemberId())
-                .permission("viewer")
+                .permission(ConstructionPermissionEnum.OBSERVER)
                 .build()
         );
     }

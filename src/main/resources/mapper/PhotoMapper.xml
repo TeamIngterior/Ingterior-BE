@@ -1,0 +1,64 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team_ingterior.ingterior.photo.mapper.PhotoMapper">
+
+    <select id="insertPhoto" parameterType="insertPhotoDTO">
+        INSERT INTO photo (
+            photo_id
+            ,object_type
+            ,object_id
+            ,original_name
+            ,file_name
+            ,path
+            ,reg_date
+            ,updt_date
+            ,status
+        )
+        SELECT
+            nextval('photo_id_seq')
+            ,#{objectType}
+            ,#{objectId}
+            ,#{originalName}
+            ,#{fileName}
+            ,#{path}
+            ,now()
+            ,null
+            ,1
+    </select>
+
+    <select id="getPhotosByObject" parameterType="photoObjectDTO" resultType="photoResponseDTO">
+        SELECT 
+            p.photo_id			                        AS photoId
+            ,p.original_name		                    AS originalName
+            ,p.file_name			                    AS imgName
+            ,p.path			                            AS path
+            ,p.reg_date		                            AS regDate
+            ,p.updt_date		                        AS updtDate
+        FROM photo p
+        WHERE p.object_id = #{objectId}
+        AND p.object_type = #{objectType}
+    </select>
+
+    <select id="getPhotoByPhotoId" parameterType="integer" resultType="photoResponseDTO">
+        SELECT 
+            p.photo_id				                    AS photoId
+            ,p.original_name		                    AS originalName
+            ,p.img_name			                        AS imgName
+            ,p.img_file_name                            AS imgFileName
+            ,p.path			                            AS path
+            ,p.reg_date		                            AS regDate
+            ,p.updt_date		                        AS updtDate
+        FROM 스키마.photo p
+        WHERE photo_id= #{photoId}
+    </select>
+
+    <select id="deletePhotoByPhotoId" parameterType="integer">
+        UPDATE photo SET
+	        status = 0
+        WHERE photo_id = #{photoId}
+        AND status = 1
+    </select>
+    
+</mapper>

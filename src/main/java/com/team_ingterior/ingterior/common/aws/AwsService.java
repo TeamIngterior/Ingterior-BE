@@ -2,10 +2,12 @@ package com.team_ingterior.ingterior.common.aws;
 
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.team_ingterior.ingterior.exception.domain.DynamicException;
 
 import lombok.RequiredArgsConstructor;
@@ -48,10 +50,19 @@ public class AwsService {
             throw new DynamicException("파일 삭제 실패");
         }
     }
+    
+    public InputStreamResource downloadFile(String fullPath){
+        S3Object object = s3Client.getObject(bucket, fullPath);
+        ObjectMetadata metadata = object.getObjectMetadata();
+        long length = metadata.getContentLength();
+        String type = metadata.getContentType();
 
-    public void replaceFile(String beforePath, String afterPath, MultipartFile file){
-        this.uploadFile(afterPath, file);
-        this.deleteFile(beforePath);
+        //log.info("Content-Type: " + metadata.getContentType());
+        //log.info("Content-Length: " + metadata.getContentLength());
+        if(metadata.getContentLength() == 0) {
+            throw new DynamicException("F003");
+        }
+        return new InputStreamResource(object.getObjectContent());
     }
 
     

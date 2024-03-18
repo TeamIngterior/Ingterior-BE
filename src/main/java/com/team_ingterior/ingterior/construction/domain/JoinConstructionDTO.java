@@ -10,5 +10,5 @@ import lombok.Setter;
 public class JoinConstructionDTO {
     private Integer constructionId;
     private Integer memberId;
-    private String permission;
+    private ConstructionPermissionEnum permission;
 }

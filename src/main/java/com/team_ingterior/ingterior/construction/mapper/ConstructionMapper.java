@@ -12,18 +12,19 @@ import com.team_ingterior.ingterior.construction.domain.LeaveConstructionRequest
 import com.team_ingterior.ingterior.construction.domain.LikeConstructionRequestDTO;
 import com.team_ingterior.ingterior.construction.domain.UpdateConstructionDTO;
 import com.team_ingterior.ingterior.construction.domain.UpdatePermissionRequestDTO;
+import com.team_ingterior.ingterior.member.domain.MemberThumnailsResponseDTO;
 
 @Mapper
 public interface ConstructionMapper {
 
     int insertConstruction(InsertConstructionDTO construction);
     List<ConstructionsResponseDTO> getConsturctionsByMemberId(int memberId);
+    ConstructionResponseDTO getConstructionByConstructionId(int constructionId);
     void updateConstruction(UpdateConstructionDTO dto);
     int deleteConstruction(int constructionId);
     void joinConstruction(JoinConstructionDTO join);
     void leaveConstruction(LeaveConstructionRequestDTO leave);
-    ConstructionResponseDTO getConstuctionByConstructionId(int consructionId);
     void likeConstructionToggle(LikeConstructionRequestDTO dto);
     void updatePermission(UpdatePermissionRequestDTO dto); 
-
+    List<MemberThumnailsResponseDTO> getMemberThumnailsByConstructionId(int constructionId);
 }

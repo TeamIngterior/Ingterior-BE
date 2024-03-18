@@ -7,7 +7,6 @@
     <select id="insertConstruction" parameterType="insertConstructionDTO" resultType="integer">
         INSERT INTO construction(
             construction_id
-            ,drawing_image_url
             ,usage
             ,name
             ,code
@@ -17,7 +16,6 @@
         )
         SELECT
             nextval('construction_id_seq')
-            ,#{path}
             ,#{usage}
             ,#{constructionName}
             ,#{constructionCode}
@@ -25,6 +23,24 @@
             ,now()
             ,1
         RETURNING construction_id
+    </select>
+
+    <select id="getConstructionByConstructionId" parameterType="integer" resultType="constructionResponseDTO">
+        SELECT
+            c.construction_id                   AS constructionId
+            ,COALESCE(p.path||p.file_name,null) AS drawingImageUrl
+            ,c.usage                            AS usage
+            ,c.name                             AS name
+            ,c.code                             AS code
+            ,m.member_code                      AS memberCode
+            ,c.reg_date ::timestamp             AS regDate
+            ,c.updt_date ::timestamp            AS updtDate
+            ,null                               AS memberThumnails
+        FROM construction c
+        JOIN member m on c.creator_id = m.member_id
+        LEFT JOIN photo p on c.construction_id = p.object_id AND p.object_type = 'CONSTRUCTION' AND p.status = 1
+        WHERE construction_id = #{constructionId}
+        AND c.status = 1
     </select>
 
     <select id="getConsturctionsByMemberId" parameterType="integer" resultType="constructionsResponseDTO">
@@ -62,8 +78,7 @@
 
     <update id="updateConstruction" parameterType="updateConstructionDTO">
         UPDATE construction SET
-            drawing_image_url = #{path}
-            ,usage = #{usage}
+            usage = #{usage}
             ,name = #{name}
             ,updt_date = now()
         WHERE construction_id = #{constructionId}
@@ -74,6 +89,7 @@
         UPDATE construction SET
             status = 0
         WHERE construction_id = #{constructionId}
+        AND status = 1
     </update>
 
     <select id="joinConstruction" parameterType="joinConstructionDTO">
@@ -98,21 +114,6 @@
         AND member_id = #{memberId}
     </select>
 
-    <select id="getConstuctionByConstructionId" parameterType="integer" resultType="constructionResponseDTO">
-        SELECT
-            construction_id         AS constructionId
-            ,drawing_image_url      AS drawingImageUrl
-            ,usage                  AS usage
-            ,name                   AS name
-            ,code                   AS code
-            ,creator_id             AS creatorId
-            ,reg_date               AS regDate
-            ,updt_date              AS updtDate
-        FROM 
-            construction
-        WHERE construction_id = #{constructionId}
-        AND status = 1
-    </select>
 
     <select id="likeConstructionToggle"  parameterType="likeConstructionRequestDTO">
         UPDATE construction_entry SET 
@@ -131,5 +132,17 @@
         AND member_id = #{targetMemberId}
     </select>
 
-    
+    <select id="getMemberThumnailsByConstructionId" parameterType="integer" resultType="memberThumnailsResponseDTO">
+        SELECT
+            m.member_id                 AS memberId
+            ,m.member_code              AS memberCode
+            ,m.img_url                  AS imgUrl
+            ,ce.permission              AS permission
+        FROM construction c
+        JOIN construction_entry ce on c.construction_id = ce.construction_id
+        JOIN member m on m.member_id = ce.member_id
+        WHERE c.construction_id = #{constructionId}
+    </select>
+
+
 </mapper>

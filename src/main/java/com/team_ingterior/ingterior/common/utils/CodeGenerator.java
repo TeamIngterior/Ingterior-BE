@@ -13,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 public class CodeGenerator {
     private final MemberService memberService;
 
-    public static String generateConstructionCode(MemberResourceResponseDTO resource){
+    public String generateConstructionCode(int memberId){
+        MemberResourceResponseDTO resource = memberService.getMemberResourceByMemberId(memberId);
         char alpha = 'A';
         //디코딩
         String memberCode = resource.getMemberCode();
