@@ -24,50 +24,44 @@ import com.team_ingterior.ingterior.construction.domain.UpdateConstructionDTO;
 import com.team_ingterior.ingterior.construction.domain.UpdateConstructionRequestDTO;
 import com.team_ingterior.ingterior.construction.domain.UpdatePermissionRequestDTO;
 import com.team_ingterior.ingterior.construction.mapper.ConstructionMapper;
-import com.team_ingterior.ingterior.member.domain.MemberThumnailResponseDTO;
-import com.team_ingterior.ingterior.member.service.MemberService;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ConstructionService {
     private final ConstructionMapper constructionMapper;
-    private final MemberService memberService;
     private final CodeGenerator codeGenerator;
-    
+
     @Transactional
-    public int insertConstruction(InsertConstructionRequestDTO construction){
+    public int insertConstruction(InsertConstructionRequestDTO construction) {
         int memberId = construction.getMemberId();
         String constructionCode = codeGenerator.generateConstructionCode(memberId);
-        
+
         InsertConstructionDTO dto = InsertConstructionDTO.builder()
-            .constructionName(construction.getConstructionName())
-            .constructionCode(constructionCode)
-            .memberId(construction.getMemberId())
-            .usage(construction.getUsage())
-            .build();
-        
+                .constructionName(construction.getConstructionName())
+                .constructionCode(constructionCode)
+                .memberId(construction.getMemberId())
+                .usage(construction.getUsage())
+                .build();
+
         int constructionId = constructionMapper.insertConstruction(dto);
 
         constructionMapper.joinConstruction(
-            JoinConstructionDTO.builder()
-                .constructionId(constructionId)
-                .memberId(memberId)
-                .permission(ConstructionPermissionEnum.ADMIN)
-                .build()
-        );
+                JoinConstructionDTO.builder()
+                        .constructionId(constructionId)
+                        .memberId(memberId)
+                        .permission(ConstructionPermissionEnum.ADMIN)
+                        .build());
 
         return constructionId;
 
     }
 
-
-    public List<ConstructionsResponseDTO> getConsturctionsByMemberId(int memberId){
+    public List<ConstructionsResponseDTO> getConsturctionsByMemberId(int memberId) {
         return constructionMapper.getConsturctionsByMemberId(memberId);
     }
 
-    public ConstructionResponseDTO getConstructionByConstructionId(int constructionId){
+    public ConstructionResponseDTO getConstructionByConstructionId(int constructionId) {
         ConstructionResponseDTO construction = constructionMapper.getConstructionByConstructionId(constructionId);
         construction.setMemberThumnails(constructionMapper.getMemberThumnailsByConstructionId(constructionId));
 
@@ -75,64 +69,61 @@ public class ConstructionService {
     }
 
     @Transactional
-    public void updateConstruction(UpdateConstructionRequestDTO construction){
+    public void updateConstruction(UpdateConstructionRequestDTO construction) {
         int memberId = construction.getMemberId();
 
         int constructionId = construction.getConstructionId();
         int usage = construction.getUsage();
-        ConstructionResponseDTO targetConstruction = constructionMapper.getConstructionByConstructionId(construction.getConstructionId());
+        ConstructionResponseDTO targetConstruction = constructionMapper
+                .getConstructionByConstructionId(construction.getConstructionId());
         String constructionName = construction.getConstructionName();
         String path = targetConstruction.getDrawingImageUrl();
 
-
         constructionMapper.updateConstruction(
-            UpdateConstructionDTO.builder()
-            .path(path)
-            .usage(usage)
-            .name(constructionName)
-            .constructionId(constructionId)
-            .build()
-        );
-
+                UpdateConstructionDTO.builder()
+                        .path(path)
+                        .usage(usage)
+                        .name(constructionName)
+                        .constructionId(constructionId)
+                        .build());
 
     }
 
-
     @Transactional
-    public int deleteConstruction(DeleteConstructionRequestDTO construction){
+    public int deleteConstruction(DeleteConstructionRequestDTO construction) {
         int consructionId = construction.getConstructionId();
         int memberId = construction.getMemberId();
 
-        //construction 존재 검증
-        //construction 삭제권한 검증
-        //ConstructionResponseDTO targetConstruction = constructionMapper.getConstuctionByConstructionId(consructionId);
+        // construction 존재 검증
+        // construction 삭제권한 검증
+        // ConstructionResponseDTO targetConstruction =
+        // constructionMapper.getConstuctionByConstructionId(consructionId);
 
         return constructionMapper.deleteConstruction(consructionId);
     }
 
     @Transactional
-    public void joinConstruction(JoinConstructionRequestDTO join){
+    public void joinConstruction(JoinConstructionRequestDTO join) {
         constructionMapper.joinConstruction(
-            JoinConstructionDTO.builder()
-                .constructionId(join.getConstructionId())
-                .memberId(join.getMemberId())
-                .permission(ConstructionPermissionEnum.OBSERVER)
-                .build()
-        );
+                JoinConstructionDTO.builder()
+                        .constructionId(join.getConstructionId())
+                        .memberId(join.getMemberId())
+                        .permission(ConstructionPermissionEnum.OBSERVER)
+                        .build());
     }
 
     @Transactional
-    public void leaveConstruction(LeaveConstructionRequestDTO leave){
+    public void leaveConstruction(LeaveConstructionRequestDTO leave) {
         constructionMapper.leaveConstruction(leave);
     }
-    
+
     @Transactional
-    public void likeConstructionToggle(LikeConstructionRequestDTO likeDTO){
+    public void likeConstructionToggle(LikeConstructionRequestDTO likeDTO) {
         constructionMapper.likeConstructionToggle(likeDTO);
     }
 
     @Transactional
-    public void updatePermission(UpdatePermissionRequestDTO permissionDTO){
+    public void updatePermission(UpdatePermissionRequestDTO permissionDTO) {
         int memberId = permissionDTO.getMemberId();
         // 권한 검증
         constructionMapper.updatePermission(permissionDTO);

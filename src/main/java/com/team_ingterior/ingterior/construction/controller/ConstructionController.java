@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.amazonaws.Response;
 import com.team_ingterior.ingterior.construction.domain.ConstructionResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.ConstructionsResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.DeleteConstructionRequestDTO;

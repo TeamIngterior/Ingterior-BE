@@ -102,21 +102,38 @@ public class PhotoService {
     }
 
     @Transactional
-    public void deletePhotoByPhotoIds(List<Integer> photoIds){
+    public void deletePhotosByPhotoIds(List<Integer> photoIds){
     
         for (Integer photoId : photoIds) {
-
             PhotoResponseDTO photo = photoMapper.getPhotoByPhotoId(photoId);
+            deletePhotoByPhotoResponseDTO(photo);
+        }
+    }
 
-            String filePath = photo.getPath()+photo.getFileName();
-            photoMapper.deletePhotoByPhotoId(photoId);
-            awsService.deleteFile(filePath);
+    public void deletePhotosByDefectId(int defectId){
+        deletePhotosByObject(new PhotoObjectDTO(PhotoObjectTypeEnum.DEFECT, defectId));
+    }
 
-            log.info("DELETE : "+filePath);
-            
+    @Transactional
+    public void deletePhotosByObject(PhotoObjectDTO object){
+        List<PhotoResponseDTO> photos = this.getPhotosByObject(object);
+
+        for (PhotoResponseDTO photo : photos) {
+            deletePhotoByPhotoResponseDTO(photo);
         }
 
     }
+
+    @Transactional
+    public void deletePhotoByPhotoResponseDTO(PhotoResponseDTO photo){
+        String filePath = photo.getPath()+photo.getFileName();
+        photoMapper.deletePhotoByPhotoId(photo.getPhotoId());
+        awsService.deleteFile(filePath);
+
+        log.info("DELETE : "+filePath);
+
+    }
+
     
     public FileVO downloadPhoto(int photoId){
         PhotoResponseDTO photo = photoMapper.getPhotoByPhotoId(photoId);

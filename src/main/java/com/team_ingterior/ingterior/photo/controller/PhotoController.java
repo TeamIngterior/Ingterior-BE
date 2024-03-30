@@ -78,7 +78,7 @@ public class PhotoController {
     @Operation(summary = "사진ID로 사진 삭제")
     @DeleteMapping("photo")
     public ResponseEntity<Void> deletePhotoByPhotoIds(List<Integer> photoIds){
-        photoService.deletePhotoByPhotoIds(photoIds);
+        photoService.deletePhotosByPhotoIds(photoIds);
         return ResponseEntity.ok().build();
     }
 

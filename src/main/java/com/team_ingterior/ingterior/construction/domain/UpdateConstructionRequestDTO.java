@@ -1,7 +1,6 @@
 package com.team_ingterior.ingterior.construction.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
