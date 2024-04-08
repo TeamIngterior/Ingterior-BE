@@ -16,4 +16,58 @@
         GROUP BY 1,2
     </select>
 
+    <select id="getMemberByEmailAndPlatform" parameterType="oAuth2UserInfo" resultType="memberDTO">
+        SELECT
+            member_id AS memberId,
+            platform AS platform,
+            name AS name,
+            email AS email,
+            member_code AS memberCode
+            img_url AS imgUrl
+        FROM member m
+        WHERE m.email = #{email} 
+        AND platform = #{platform}
+        AND status = 1
+    </select>
+
+    <select id="insertUserByInfo" parameterType="memberDTO">
+        INSERT INTO member(
+            member_id,
+            platform,
+            name,
+            email,
+            member_code,
+            img_url,
+            reg_date,
+            status
+        )SELECT
+            nextval('member_id_seq')
+            #{platform},
+            #{name},
+            #{email},
+            #{memberCode},
+            #{imgUrl},
+            now(),
+            1
+    </select>
+
+    <select id="countMembersByPlatform" parameterType="String" resultType="integer">
+        SELECT count(1)
+        FROM member WHERE platform = #{platform}
+    </select>
+
+    <select id="updateMemberProfile" parameterType="memberDTO">
+        UPDATE member SET
+            img_url = #{imgUrl}
+            ,name = #{name}
+        WHERE member_id = #{memberId}
+    </select>
+
+    <select id="updateRefreshToken" parameterType="updateRefreshTokenDTO">
+        UPDATE member SET
+            refresh_token = #{refreshToken}
+        WHERE member_id = #{memberId}
+        AND status != 0
+    </select>
+
 </mapper>

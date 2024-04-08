@@ -33,7 +33,7 @@ public class DefectController {
 
     @Operation(summary = "하자체크 생성")
     @PostMapping("/defect")
-    public ResponseEntity<Integer> insertDefect(@RequestBody InsertDefectRequestDTO defect) {
+    public ResponseEntity<Integer> postDefect(@RequestBody InsertDefectRequestDTO defect) {
         return ResponseEntity.ok().body(defectService.insertDefect(defect));
     }
 

@@ -1,0 +1,48 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team_ingterior.ingterior.work.mapper.WorkMapper">
+
+    <select id="insertWork" parameterType="insertWorkDTO">
+        INSERT INTO work(
+            work_id
+            ,construction_id
+            ,work_name
+            ,work_description
+            ,work_color
+            ,member_id
+            ,start_date
+            ,end_date
+            ,reg_date
+            ,updt_date
+            ,status
+        )SELECT
+            nextval('work_id_seq')
+            ,#{constructionId}
+            ,#{workName}
+            ,#{workDescription}
+            ,#{workColor}
+            ,#{memberId}
+            ,#{startDate}:timestamp
+            ,#{endDate}::timestamp
+            ,now()
+            ,null
+            ,1
+    </select>
+
+    <select id="selectWorkByWorkId" parameterType="integer" resultType="workDTO">
+        SELECT 
+            work_name       AS workName
+            ,start_date     AS startDate
+            ,end_date       AS endDate
+            ,work_color     AS workColor
+            ,member_id      AS memberId
+            ,reg_date       AS regDate
+            ,updt_date      AS updtDate
+        FROM work 
+        WHERE work_id = #{workId}
+        AND status = 1
+    </select>
+
+</mapper>

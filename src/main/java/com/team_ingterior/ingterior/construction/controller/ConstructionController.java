@@ -36,8 +36,8 @@ public class ConstructionController {
 
     @Operation(summary = "현장 추가")
     @PostMapping("construction")
-    public ResponseEntity<Integer> insertConstruction(InsertConstructionRequestDTO construction) {
-        return ResponseEntity.ok().body(constructionService.insertConstruction(construction));
+    public ResponseEntity<Integer> postConstruction(InsertConstructionRequestDTO construction) {
+        return ResponseEntity.ok().body(constructionService.postConstruction(construction));
     }
 
     @Operation(summary = "현장 조회")
@@ -82,14 +82,14 @@ public class ConstructionController {
 
     @Operation(summary = "현장 좋아요")
     @PostMapping("construction/like")
-    public ResponseEntity<Void> postMethodName(@RequestBody LikeConstructionRequestDTO likeDTO) {
+    public ResponseEntity<Void> likeConstruction(@RequestBody LikeConstructionRequestDTO likeDTO) {
         constructionService.likeConstructionToggle(likeDTO);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "현장 권한 수정")
     @PutMapping("construction/permission")
-    public ResponseEntity<Void> putMethodName(@RequestBody UpdatePermissionRequestDTO permissionDTO) {
+    public ResponseEntity<Void> updateConstructionPermission(@RequestBody UpdatePermissionRequestDTO permissionDTO) {
         constructionService.updatePermission(permissionDTO);
         return ResponseEntity.ok().build();
     }

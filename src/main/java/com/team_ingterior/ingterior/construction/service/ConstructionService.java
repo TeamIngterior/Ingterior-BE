@@ -33,7 +33,7 @@ public class ConstructionService {
     private final CodeGenerator codeGenerator;
 
     @Transactional
-    public int insertConstruction(InsertConstructionRequestDTO construction) {
+    public int postConstruction(InsertConstructionRequestDTO construction) {
         int memberId = construction.getMemberId();
         String constructionCode = codeGenerator.generateConstructionCode(memberId);
 

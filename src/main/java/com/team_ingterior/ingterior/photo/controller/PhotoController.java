@@ -49,11 +49,19 @@ public class PhotoController {
             return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "공사관리 사진 업로드")
-    @PostMapping(value = "photo/work", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> postWorkPhotos(@RequestParam("workId") int workId, 
+    @Operation(summary = "공사관리 도면 업로드")
+    @PostMapping(value = "photo/work-main", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> postWorkMainPhotos(@RequestParam("workId") int workId, 
         @RequestPart("photos") List<MultipartFile> photos) {
-            photoService.postWorkPhotos(workId, photos);
+            photoService.postWorkMainPhotos(workId, photos);
+            return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "공사관리 참고사진 업로드")
+    @PostMapping(value = "photo/work-sub", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> postWorkSubPhotos(@RequestParam("workId") int workId, 
+        @RequestPart("photos") List<MultipartFile> photos) {
+            photoService.postWorkSubPhotos(workId, photos);
             return ResponseEntity.ok().build();
     }
 

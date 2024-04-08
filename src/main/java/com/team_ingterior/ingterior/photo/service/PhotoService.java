@@ -37,8 +37,11 @@ public class PhotoService {
         return this.getPhotosByObject(new PhotoObjectDTO(PhotoObjectTypeEnum.DEFECT, defectId));
     }
 
+    public List<PhotoResponseDTO> getPhotosByWorkMainId(int workId){
+        return this.getPhotosByObject(new PhotoObjectDTO(PhotoObjectTypeEnum.WORK_MAIN,workId));
+    }
     public List<PhotoResponseDTO> getPhotosByWorkId(int workId){
-        return this.getPhotosByObject(new PhotoObjectDTO(PhotoObjectTypeEnum.WORK,workId));
+        return this.getPhotosByObject(new PhotoObjectDTO(PhotoObjectTypeEnum.WORK_SUB,workId));
     }
 
     public List<PhotoResponseDTO> getPhotosByObject(PhotoObjectDTO object){
@@ -58,8 +61,12 @@ public class PhotoService {
         this.postPhotos(PhotoObjectTypeEnum.DEFECT, defectId, photos);
     }
     
-    public void postWorkPhotos(int defectId, List<MultipartFile> photos){
-        this.postPhotos(PhotoObjectTypeEnum.WORK, defectId, photos);
+    public void postWorkMainPhotos(int workId, List<MultipartFile> photos){
+        this.postPhotos(PhotoObjectTypeEnum.WORK_MAIN, workId, photos);
+    }
+
+    public void postWorkSubPhotos(int workId, List<MultipartFile> photos){
+        this.postPhotos(PhotoObjectTypeEnum.WORK_SUB, workId, photos);
     }
 
 
