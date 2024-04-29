@@ -76,6 +76,20 @@
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
     </select>
 
+    <select id="getConstructionsByConstructionCode" parameterType="String" resultType="getConstructionByCodeDTO">
+        SELECT
+            c.construction_id                   AS constructionId
+            ,c.name                             AS constructionName
+            ,c.code                             AS constructioCode
+            ,m.member_code                      AS memberCode
+            ,c.reg_date ::timestamp             AS regDate
+            ,null                               AS memberThumnails
+        FROM construction c
+        JOIN member m on c.creator_id = m.member_id
+        WHERE code = #{constructionCode}
+        AND c.status = 1
+    </select>
+
     <update id="updateConstruction" parameterType="updateConstructionDTO">
         UPDATE construction SET
             usage = #{usage}

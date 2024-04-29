@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.team_ingterior.ingterior.construction.domain.ConstructionResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.ConstructionsResponseDTO;
+import com.team_ingterior.ingterior.construction.domain.GetConstructionByCodeDTO;
 import com.team_ingterior.ingterior.construction.domain.InsertConstructionDTO;
 import com.team_ingterior.ingterior.construction.domain.JoinConstructionDTO;
 import com.team_ingterior.ingterior.construction.domain.LeaveConstructionRequestDTO;
@@ -20,6 +21,7 @@ public interface ConstructionMapper {
     int insertConstruction(InsertConstructionDTO construction);
     List<ConstructionsResponseDTO> getConsturctionsByMemberId(int memberId);
     ConstructionResponseDTO getConstructionByConstructionId(int constructionId);
+    GetConstructionByCodeDTO getConstructionsByConstructionCode(String constructionCode);
     void updateConstruction(UpdateConstructionDTO dto);
     int deleteConstruction(int constructionId);
     void joinConstruction(JoinConstructionDTO join);

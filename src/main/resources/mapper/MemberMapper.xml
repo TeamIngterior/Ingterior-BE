@@ -19,10 +19,10 @@
     <select id="getMemberByEmailAndPlatform" parameterType="oAuth2UserInfo" resultType="memberDTO">
         SELECT
             member_id AS memberId,
-            platform AS platform,
-            name AS name,
             email AS email,
-            member_code AS memberCode
+            name AS name,
+            platform AS platform,
+            member_code AS memberCode,
             img_url AS imgUrl
         FROM member m
         WHERE m.email = #{email} 
@@ -41,7 +41,7 @@
             reg_date,
             status
         )SELECT
-            nextval('member_id_seq')
+            nextval('member_id_seq'),
             #{platform},
             #{name},
             #{email},
@@ -51,7 +51,7 @@
             1
     </select>
 
-    <select id="countMembersByPlatform" parameterType="String" resultType="integer">
+    <select id="countMembersByPlatform" parameterType="oAuth2PlatFormEnum" resultType="integer">
         SELECT count(1)
         FROM member WHERE platform = #{platform}
     </select>
@@ -68,6 +68,13 @@
             refresh_token = #{refreshToken}
         WHERE member_id = #{memberId}
         AND status != 0
+    </select>
+
+    <select id="deleteMember" parameterType="integer">
+        UPDATE member SET
+            status = 0
+        WHERE member_id = #{memberId}
+        AND status = 1
     </select>
 
 </mapper>

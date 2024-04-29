@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team_ingterior.ingterior.construction.domain.ConstructionResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.ConstructionsResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.DeleteConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.domain.GetConstructionByCodeDTO;
 import com.team_ingterior.ingterior.construction.domain.InsertConstructionRequestDTO;
 import com.team_ingterior.ingterior.construction.domain.JoinConstructionRequestDTO;
 import com.team_ingterior.ingterior.construction.domain.LeaveConstructionRequestDTO;
@@ -44,6 +45,12 @@ public class ConstructionController {
     @GetMapping("construction")
     public ResponseEntity<ConstructionResponseDTO> getConstructionByConstructionId(@RequestParam int constructionId){
         return ResponseEntity.ok().body(constructionService.getConstructionByConstructionId(constructionId));
+    }
+
+    @Operation(summary ="코드로 현장 조회")
+    @GetMapping("construction/code")
+    public ResponseEntity<GetConstructionByCodeDTO> getConstructionByConstructionCode(@RequestParam String constructionCode){
+        return ResponseEntity.ok().body(constructionService.getConstructionByConstructionCode(constructionCode));
     }
 
     @Operation(summary = "현장 목록 조회")

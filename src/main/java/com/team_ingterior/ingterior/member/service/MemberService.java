@@ -18,4 +18,8 @@ public class MemberService{
         return memberMapper.getMemberResourceByMemberId(memberId);
     }
 
+    public void deleteMember(int memberId){
+        memberMapper.deleteMember(memberId);
+    }
+
 }

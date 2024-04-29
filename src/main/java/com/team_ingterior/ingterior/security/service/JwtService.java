@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.team_ingterior.ingterior.security.domain.AuthToken;
 import com.team_ingterior.ingterior.security.domain.CustomUser;
@@ -18,9 +19,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Getter
 @RequiredArgsConstructor
 public class JwtService {
 
@@ -152,6 +155,13 @@ public class JwtService {
 
     public void setRefreshTokenInHeader(HttpServletResponse response, String refreshToken) {
         response.setHeader(refreshHeader, PREFIX + refreshToken);
+    }
+
+    public String getRedirectUrl(final String REDIRECT_URL, AuthToken authToken) {
+        return UriComponentsBuilder.fromUriString(REDIRECT_URL)
+                .queryParam(accessHeader, authToken.getAccessToken())
+                .queryParam(refreshHeader, authToken.getRefreshToken())
+                .build().toUriString();
     }
 
 

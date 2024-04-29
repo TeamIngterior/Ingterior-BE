@@ -19,5 +19,6 @@ public enum OAuth2PlatFormEnum {
     public String getPlatformCode() {
         return platformCode;
     }
+    
 
 }

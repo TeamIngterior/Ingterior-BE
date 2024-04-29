@@ -22,4 +22,6 @@ public interface MemberMapper {
     void updateMemberProfile(MemberDTO member);
 
     void updateRefreshToken(UpdateRefreshTokenDTO data);
+
+    void deleteMember(int memberId);
 }

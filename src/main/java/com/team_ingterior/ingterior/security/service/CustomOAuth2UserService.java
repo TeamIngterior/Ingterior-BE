@@ -3,9 +3,7 @@ package com.team_ingterior.ingterior.security.service;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.ibatis.javassist.compiler.ast.Member;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -36,7 +34,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(OAuth2PlatFormEnum.valueOf(registrationId), oAuth2User.getAttributes());
+        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(OAuth2PlatFormEnum.valueOf(registrationId.toUpperCase()), oAuth2User.getAttributes());
         
         log.info("oAuth2UserInfo -> {}",oAuth2UserInfo);
 
@@ -48,8 +46,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
                 MemberDTO.builder()
                 .email(oAuth2UserInfo.getEmail())
                 .name(oAuth2UserInfo.getName())
-                .platform(oAuth2UserInfo.getProvider())
-                .memberCode(codeGenerator.generateMemberCode(oAuth2UserInfo.getProvider()))
+                .platform(oAuth2UserInfo.getPlatform())
+                .memberCode(codeGenerator.generateMemberCode(oAuth2UserInfo.getPlatform()))
+                .imgUrl(oAuth2UserInfo.getPicture())
                 .build());
                 
                 member = memberMapper.getMemberByEmailAndPlatform(oAuth2UserInfo);

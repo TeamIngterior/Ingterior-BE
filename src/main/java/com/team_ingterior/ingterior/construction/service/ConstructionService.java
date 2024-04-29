@@ -1,19 +1,16 @@
 package com.team_ingterior.ingterior.construction.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.team_ingterior.ingterior.common.aws.AwsService;
 import com.team_ingterior.ingterior.common.utils.CodeGenerator;
 import com.team_ingterior.ingterior.construction.domain.ConstructionPermissionEnum;
 import com.team_ingterior.ingterior.construction.domain.ConstructionResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.ConstructionsResponseDTO;
 import com.team_ingterior.ingterior.construction.domain.DeleteConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.domain.GetConstructionByCodeDTO;
 import com.team_ingterior.ingterior.construction.domain.InsertConstructionDTO;
 import com.team_ingterior.ingterior.construction.domain.InsertConstructionRequestDTO;
 import com.team_ingterior.ingterior.construction.domain.JoinConstructionDTO;
@@ -64,6 +61,13 @@ public class ConstructionService {
     public ConstructionResponseDTO getConstructionByConstructionId(int constructionId) {
         ConstructionResponseDTO construction = constructionMapper.getConstructionByConstructionId(constructionId);
         construction.setMemberThumnails(constructionMapper.getMemberThumnailsByConstructionId(constructionId));
+
+        return construction;
+    }
+
+    public GetConstructionByCodeDTO getConstructionByConstructionCode(String constructionCode) {
+        GetConstructionByCodeDTO construction = constructionMapper.getConstructionsByConstructionCode(constructionCode);
+        construction.setMemberThumnails(constructionMapper.getMemberThumnailsByConstructionId(construction.getConstructionId()));
 
         return construction;
     }

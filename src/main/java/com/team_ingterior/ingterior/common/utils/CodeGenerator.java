@@ -7,7 +7,8 @@ import com.team_ingterior.ingterior.member.mapper.MemberMapper;
 import com.team_ingterior.ingterior.security.enums.OAuth2PlatFormEnum;
 
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CodeGenerator {
@@ -23,6 +24,7 @@ public class CodeGenerator {
         String number = String.format("%03d", (countMembersByPlatform % 1000));
 
         String memberCode = version + platFormCode + alpha + number;
+        log.info("generated memberCode -> {}",memberCode);
 
         return memberCode;
     }

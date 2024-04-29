@@ -1,12 +1,15 @@
 package com.team_ingterior.ingterior.security.handler;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.team_ingterior.ingterior.member.domain.UpdateRefreshTokenDTO;
 import com.team_ingterior.ingterior.member.mapper.MemberMapper;
@@ -26,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
     private final JwtService jwtService;
     private final MemberMapper memberMapper;
+    @Value("${client_redirect_uri}")
+    private String CLIENT_REDIRECT_URI;
     
     @Override
     @Transactional
@@ -49,7 +54,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         //User-Agent확인하여 웹이면 Redirect
         if(!isMobile(userAgent)){
-            getRedirectStrategy().sendRedirect(request, response,"/uri");
+            getRedirectStrategy().sendRedirect(request, response,jwtService.getRedirectUrl(CLIENT_REDIRECT_URI, authToken));
         }
 
     }

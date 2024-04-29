@@ -14,30 +14,30 @@ import lombok.ToString;
 @Builder
 @RequiredArgsConstructor
 public class OAuth2UserInfo {
-    private final OAuth2PlatFormEnum provider;
+    private final OAuth2PlatFormEnum platform;
     private final String name;
     private final String email;
     private final String picture;
 
-    public static OAuth2UserInfo of(OAuth2PlatFormEnum provider, Map<String,Object> attributes){
+    public static OAuth2UserInfo of(OAuth2PlatFormEnum platform, Map<String,Object> attributes){
 
-        switch (provider) {
+        switch (platform) {
             case GOOGLE:
-                return ofGoogle(provider,  attributes);
+                return ofGoogle(platform,  attributes);
             // case KAKAO:
-            //     return ofKakao(provider,  attributes);
+            //     return ofKakao(platform,  attributes);
             // case NAVER:
-            //     return ofNaver(provider,  attributes);
+            //     return ofNaver(platform,  attributes);
             default:
                 throw new RuntimeException();
         }
 
     }
 
-    private static OAuth2UserInfo ofGoogle(OAuth2PlatFormEnum provider, Map<String,Object> attributes){
+    private static OAuth2UserInfo ofGoogle(OAuth2PlatFormEnum platform, Map<String,Object> attributes){
         
         return OAuth2UserInfo.builder()
-            .provider(provider)
+            .platform(platform)
             .email((String)attributes.get("email"))
             .name((String)attributes.get("name"))
             .picture((String)attributes.get("picture"))

@@ -1,0 +1,20 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.team_ingterior.ingterior.terms.mapper.TermsMapper">
+    
+    <select id="getTerms" resultType="termsResponseDTO">
+        SELECT
+            term_id AS termId,
+            content AS content,
+            parent_id AS parentId,
+            level AS level
+        FROM
+            terms
+        ORDER BY 1
+    </select>
+
+
+
+</mapper>
