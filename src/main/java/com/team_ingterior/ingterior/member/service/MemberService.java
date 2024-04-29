@@ -8,7 +8,6 @@ import com.team_ingterior.ingterior.member.mapper.MemberMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @Service
 @RequiredArgsConstructor
 public class MemberService{

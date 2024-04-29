@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.team_ingterior.ingterior.member.service.MemberService;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 @Tag(name = "사용자 API")
 public class MemberController {
+    private final MemberService memberService;
     
     @GetMapping("/member/{platform}")
     public void loginMember(@PathVariable String platform, HttpServletResponse response) throws IOException {
@@ -38,7 +41,7 @@ public class MemberController {
 
     @DeleteMapping("/member")
     public void deleteMember(@RequestBody int memberId){
-        
+        memberService.deleteMember(memberId);
     }
     
 
