@@ -1,4 +1,4 @@
-package com.team_ingterior.ingterior.construction.domain;
+package com.team_ingterior.ingterior.construction.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -16,8 +16,8 @@ public class ConstructionResponseDTO {
    private Integer constructionId;
    private String drawingImageUrl;
    private Integer usage;
-   private String name;
-   private String code;
+   private String constructionName;
+   private String constructionCode;
    private String memberCode;
    private OffsetDateTime regDate;
    private OffsetDateTime updtDate;

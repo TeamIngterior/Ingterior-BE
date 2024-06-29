@@ -1,4 +1,4 @@
-package com.team_ingterior.ingterior.construction.domain;
+package com.team_ingterior.ingterior.construction.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;

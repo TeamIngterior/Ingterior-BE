@@ -9,9 +9,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import com.team_ingterior.ingterior.security.enums.OAuth2PlatFormEnum;
 
 import lombok.Builder;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @Builder
+@ToString
+@Setter
 public class CustomUser implements OAuth2User{
     
     private Integer memberId;

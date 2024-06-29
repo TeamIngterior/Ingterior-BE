@@ -1,49 +1,62 @@
 package com.team_ingterior.ingterior.security.filter;
-// package com.team_ingterior.ingterior.filter;
 
-// import io.jsonwebtoken.Claims;
-// import io.jsonwebtoken.Jws;
-// import io.jsonwebtoken.Jwts;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-// import org.springframework.beans.factory.annotation.Value;
-// import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.security.core.context.SecurityContextHolder;
-// import org.springframework.web.filter.OncePerRequestFilter;
+import com.team_ingterior.ingterior.security.domain.AuthToken;
+import com.team_ingterior.ingterior.security.service.JwtService;
 
-// import jakarta.servlet.FilterChain;
-// import jakarta.servlet.ServletException;
-// import jakarta.servlet.http.HttpServletRequest;
-// import jakarta.servlet.http.HttpServletResponse;
-// import java.io.IOException;
-// import java.util.Collections;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-// public class JwtTokenFilter extends OncePerRequestFilter {
+import java.io.IOException;
 
-//     @Value("${jwt.secretKey}")
-//     private String secretKey; 
+@RequiredArgsConstructor
+@Slf4j
+@Component
+public class JwtTokenFilter extends OncePerRequestFilter {
 
-//     @Override
-//     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-//             throws ServletException, IOException {
-//         String token = request.getHeader("Authorization");
-//         if (token != null && token.startsWith("Bearer ")) {
-//             token = token.substring(7);
-//             try {
-//                 Claims claims = Jwts.parserBuilder()
-//                         .setSigningKey(secretKey.getBytes())
-//                         .build()
-//                         .parseClaimsJws(token)
-//                         .getBody();
+    private static final String NO_CHECK_URL = "/login";
 
-//                 String username = claims.getSubject();
-//                 if (username != null) {
-//                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
-//                     SecurityContextHolder.getContext().setAuthentication(auth);
-//                 }
-//             } catch (Exception e) {
-//                 SecurityContextHolder.clearContext(); // 토큰 검증 실패 시, 보안 컨텍스트 클리어
-//             }
-//         }
-//         filterChain.doFilter(request, response);
-//     }
-// }
+    private final JwtService jwtService;
+
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException{
+
+        if (request.getRequestURI().equals(NO_CHECK_URL)) {
+            filterChain.doFilter(request, response); 
+            return; 
+        }
+
+        AuthToken authToken = jwtService.getAuthToken(request);
+
+        String accessToken = authToken.getAccessToken();
+        String refreshToken = authToken.getRefreshToken();
+
+        
+        try {
+            if(refreshToken != null && accessToken == null){
+                jwtService.checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+                return;
+            } else if(accessToken != null && refreshToken == null){
+                jwtService.checkAccessTokenAndSetAuthentication(accessToken);
+                filterChain.doFilter(request, response);
+            } else {
+                filterChain.doFilter(request, response);
+            }
+        } catch (Exception e) {
+            log.error("JWT processing failed: {}", e.getMessage(),e);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT token is invalid or expired");
+        }
+
+    }
+
+}

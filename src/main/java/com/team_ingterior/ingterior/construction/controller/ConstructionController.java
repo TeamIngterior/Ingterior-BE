@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.team_ingterior.ingterior.construction.domain.ConstructionResponseDTO;
-import com.team_ingterior.ingterior.construction.domain.ConstructionsResponseDTO;
-import com.team_ingterior.ingterior.construction.domain.DeleteConstructionRequestDTO;
-import com.team_ingterior.ingterior.construction.domain.GetConstructionByCodeDTO;
-import com.team_ingterior.ingterior.construction.domain.InsertConstructionRequestDTO;
-import com.team_ingterior.ingterior.construction.domain.JoinConstructionRequestDTO;
-import com.team_ingterior.ingterior.construction.domain.LeaveConstructionRequestDTO;
-import com.team_ingterior.ingterior.construction.domain.LikeConstructionRequestDTO;
-import com.team_ingterior.ingterior.construction.domain.UpdateConstructionRequestDTO;
-import com.team_ingterior.ingterior.construction.domain.UpdatePermissionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.ConstructionResponseDTO;
+import com.team_ingterior.ingterior.construction.dto.ConstructionsResponseDTO;
+import com.team_ingterior.ingterior.construction.dto.DeleteConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.GetConstructionByCodeDTO;
+import com.team_ingterior.ingterior.construction.dto.InsertConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.JoinConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.LeaveConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.LikeConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.UpdateConstructionRequestDTO;
+import com.team_ingterior.ingterior.construction.dto.UpdatePermissionRequestDTO;
 import com.team_ingterior.ingterior.construction.service.ConstructionService;
 
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,4 +1,4 @@
-package com.team_ingterior.ingterior.construction.domain;
+package com.team_ingterior.ingterior.construction.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

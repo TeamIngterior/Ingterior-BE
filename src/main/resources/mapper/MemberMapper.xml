@@ -56,6 +56,18 @@
         FROM member WHERE platform = #{platform}
     </select>
 
+    <select id="getMemberByRefreshToken" parameterType="String" resultType="memberDTO">
+        SELECT 
+            member_id       as memberId,
+            email           as email,
+            name            as name,
+            platform        as platform,
+            member_code      as memberCode,
+            img_url         as imgUrl
+        FROM member
+        WHERE refresh_token = #{refreshToken}
+    </select>
+
     <select id="updateMemberProfile" parameterType="memberDTO">
         UPDATE member SET
             img_url = #{imgUrl}

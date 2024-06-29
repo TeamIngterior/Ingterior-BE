@@ -1,4 +1,4 @@
-package com.team_ingterior.ingterior.construction.domain;
+package com.team_ingterior.ingterior.construction.dto;
 
 import lombok.Builder;
 import lombok.Getter;

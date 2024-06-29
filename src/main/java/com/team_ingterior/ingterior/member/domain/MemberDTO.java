@@ -21,17 +21,4 @@ public class MemberDTO {
     private String memberCode;
     private String imgUrl;
 
-    
-
-    // //객체 비교를 위한 equals override
-    // @Override
-    // public boolean equals(Object o) {
-    //     if (this == o) return true;
-    //     if (o == null || getClass() != o.getClass()) return false;
-    //     MemberDTO memberDTO = (MemberDTO) o;
-    //     return Objects.equals(memberId, memberDTO.memberId) &&
-    //            Objects.equals(email, memberDTO.email) &&
-    //            Objects.equals(name, memberDTO.name) &&
-    //            Objects.equals(platform, memberDTO.platform);
-    // }
 }

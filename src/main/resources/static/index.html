@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Redirect</title>
+</head>
+<body>
+    <h1>Login Successful</h1>
+    <button onclick="window.location.href='http://localhost:80/member/google'">Login with Google</button>
+
+    <p id="accessToken">Access Token: Loading...</p>
+    <p id="refreshToken">Refresh Token: Loading...</p>
+
+    <script>
+        function getQueryStringValue(key) {
+            return new URLSearchParams(window.location.search).get(key);
+        }
+
+        window.onload = function() {
+            var accessToken = getQueryStringValue('accessToken');
+            var refreshToken = getQueryStringValue('refreshToken');
+
+            if (accessToken && refreshToken) {
+                document.getElementById('accessToken').textContent = `Access Token: ${accessToken}`;
+                document.getElementById('refreshToken').textContent = `Refresh Token: ${refreshToken}`;
+
+                // 토큰을 로컬 스토리지에 저장
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+            } else {
+                document.getElementById('accessToken').textContent = 'Access Token not found.';
+                document.getElementById('refreshToken').textContent = 'Refresh Token not found.';
+            }
+        }
+
+        // 예제 API 호출 (Access Token 사용)
+        function callApiWithAccessToken() {
+            const accessToken = localStorage.getItem('accessToken');
+            fetch('http://localhost:80/context-test', {
+                method: 'GET',
+                headers: {
+                    'accessToken': `Bearer ${accessToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        // 예제 API 호출 (Refresh Token 사용)
+        function callApiWithRefreshToken() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            fetch('http://localhost:80/token', {
+                method: 'GET',
+                headers: {
+                    'refreshToken': `Bearer ${refreshToken}`
+                }
+            })
+            .then(response => {
+                const newAccessToken = response.headers.get('accessToken');
+                const newRefreshToken = response.headers.get('refreshToken');
+                
+                if (newAccessToken) {
+                    localStorage.setItem('accessToken', newAccessToken);
+                    document.getElementById('accessToken').textContent = `Access Token: ${newAccessToken}`;
+                }
+
+                if (newRefreshToken) {
+                    localStorage.setItem('refreshToken', newRefreshToken);
+                    document.getElementById('refreshToken').textContent = `Refresh Token: ${newRefreshToken}`;
+                }
+
+                return response.json();
+            })
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <button onclick="callApiWithAccessToken()">Call API with Access Token</button>
+    <button onclick="callApiWithRefreshToken()">Call API with Refresh Token</button>
+</body>
+</html>

@@ -4,8 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
@@ -27,39 +30,34 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
     
     private final MemberMapper memberMapper;
     private final CodeGenerator codeGenerator;
+    private final ClientRegistrationRepository clientRegistrationRepository;
+
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException{
-        //platform 반환.
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.of(OAuth2PlatFormEnum.valueOf(registrationId.toUpperCase()), oAuth2User.getAttributes());
-        
-        log.info("oAuth2UserInfo -> {}",oAuth2UserInfo);
 
         MemberDTO member = memberMapper.getMemberByEmailAndPlatform(oAuth2UserInfo);
-        
-        if(member == null){
-            //데이터가 없을시 생성 (현재 status 1로만 찾고있음. 삭제유저는 새로 생성될 것.)
+
+        if (member == null) {
             memberMapper.insertUserByInfo(
                 MemberDTO.builder()
-                .email(oAuth2UserInfo.getEmail())
-                .name(oAuth2UserInfo.getName())
-                .platform(oAuth2UserInfo.getPlatform())
-                .memberCode(codeGenerator.generateMemberCode(oAuth2UserInfo.getPlatform()))
-                .imgUrl(oAuth2UserInfo.getPicture())
-                .build());
-                
-                member = memberMapper.getMemberByEmailAndPlatform(oAuth2UserInfo);
-                log.info("member created -> {}",member.toString());
+                    .email(oAuth2UserInfo.getEmail())
+                    .name(oAuth2UserInfo.getName())
+                    .platform(oAuth2UserInfo.getPlatform())
+                    .memberCode(codeGenerator.generateMemberCode(oAuth2UserInfo.getPlatform()))
+                    .imgUrl(oAuth2UserInfo.getPicture())
+                    .build()
+            );
 
-        }else if(isNecessaryToUpdate(member,oAuth2UserInfo)){
-            //데이터는 있으나 변경이 필요한 경우 업데이트
+            member = memberMapper.getMemberByEmailAndPlatform(oAuth2UserInfo);
+        } else if (isNecessaryToUpdate(member, oAuth2UserInfo)) {
             memberMapper.updateMemberProfile(member);
         }
-        
-        //OAuth2User 구현체 반환.
+
         return CustomUser.builder()
             .memberId(member.getMemberId())
             .email(member.getEmail())
@@ -81,6 +79,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
         }
 
         return false;
+    }
+
+
+
+    public CustomUser loadUserFromToken(OAuth2PlatFormEnum platFormEnum, String providerAccessToken) {
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, providerAccessToken, null, null);
+        String registrationId = platFormEnum.getRegistrationId();
+        ClientRegistration clientRegistration = getClientRegistrationById(registrationId);
+
+        OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
+        return (CustomUser)this.loadUser(userRequest);
+
+    }
+
+    private ClientRegistration getClientRegistrationById(String registrationId) {
+        return clientRegistrationRepository.findByRegistrationId(registrationId);
     }
 
 }

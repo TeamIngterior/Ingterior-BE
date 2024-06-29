@@ -1,22 +1,35 @@
 package com.team_ingterior.ingterior.security.service;
 
+import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.team_ingterior.ingterior.member.domain.MemberDTO;
+import com.team_ingterior.ingterior.member.domain.UpdateRefreshTokenDTO;
+import com.team_ingterior.ingterior.member.mapper.MemberMapper;
 import com.team_ingterior.ingterior.security.domain.AuthToken;
 import com.team_ingterior.ingterior.security.domain.CustomUser;
 import com.team_ingterior.ingterior.security.enums.OAuth2PlatFormEnum;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
@@ -29,17 +42,29 @@ public class JwtService {
 
     private final String PREFIX = "Bearer ";
     private final String BLANK = "";
-    // @Value("${jwt.secret}")
-    // private String secret;
+
+    @Value("${jwt.secret}")
+    private String secret;
     @Value("${jwt.access.expiration}")
-    private long accessTokenValidationSeconds;
+    private Long accessTokenExpirationPeriod;
     @Value("${jwt.refresh.expiration}")
-    private long refreshTokenValidationSeconds;
+    private Long refreshTokenExpirationPeriod;
     @Value("${jwt.access.header}")
     private String accessHeader;
     @Value("${jwt.refresh.header}")
     private String refreshHeader;
-    private SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private Key secretKey;
+    private final MemberMapper memberMapper;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+    
+    public AuthToken generateAuthToken(Authentication auth){
+        CustomUser customUser = (CustomUser) auth.getPrincipal();
+        return generateAuthToken(customUser);
+    }
 
     public AuthToken generateAuthToken(CustomUser customUser){
         return AuthToken.builder()
@@ -48,112 +73,119 @@ public class JwtService {
             .build();
     }
 
-
     public String generateRefreshToken(CustomUser customUser) {
+        
+        String refreshToken = generateToken(customUser, refreshTokenExpirationPeriod);
 
-        // 새로운 클레임 객체를 생성하고, 이메일과 역할(권한)을 셋팅
-        Claims claims = Jwts.claims().setSubject("RefreshToken");
-        claims.put("email", customUser.getEmail());
-        claims.put("platform", customUser.getPlatform().toString());
-        claims.put("role", customUser.getAuthorities().toString());
+        memberMapper.updateRefreshToken(
+                UpdateRefreshTokenDTO.builder()
+                        .memberId(customUser.getMemberId())
+                        .refreshToken(refreshToken)
+                        .build());
 
-        Date now = new Date();
-
-        return Jwts.builder()
-                .setClaims(claims)
-                // 발행일자를 넣는다.
-                .setIssuedAt(now)
-                // 토큰의 만료일시를 설정한다.
-                .setExpiration(new Date(now.getTime() + refreshTokenValidationSeconds))
-                // 지정된 서명 알고리즘과 비밀 키를 사용하여 토큰을 서명한다.
-                .signWith(secretKey)
-                .compact();
+        return refreshToken;
     }
+
 
     public String generateAccessToken(CustomUser customUser) {
-        Claims claims = Jwts.claims().setSubject("AccessToken");
+        return generateToken(customUser, accessTokenExpirationPeriod);
+    }
+
+    public String generateToken(CustomUser customUser, Long expirationTime) {
+
+        Claims claims = Jwts.claims().setSubject(customUser.getEmail());
+        claims.put("memberId", customUser.getMemberId());
         claims.put("email", customUser.getEmail());
         claims.put("platform", customUser.getPlatform().toString());
-        claims.put("role", customUser.getAuthorities().toString());
+        claims.put("role", customUser.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority()).collect(Collectors.toList()));
 
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + accessTokenValidationSeconds))
-                .signWith(secretKey)
+                .setExpiration(new Date(now.getTime() + expirationTime))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) throws Exception{
+
+        //verify
+        parseClaims(refreshToken);
+
+
+        Optional<MemberDTO> memberDTO = Optional.ofNullable(memberMapper.getMemberByRefreshToken(refreshToken));
+
+        memberDTO.ifPresent(member ->{
+
+            CustomUser customUser = CustomUser.builder()
+                .memberId(member.getMemberId())
+                .email(member.getEmail())
+                .platform(member.getPlatform())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")))
+                .build();
+
+            setAuthTokenHeader(response, 
+                AuthToken.builder()
+                    .accessToken(generateAccessToken(customUser))
+                    .refreshToken(generateRefreshToken(customUser))
+                    .build()
+            );
+        });
 
     }
 
+    public void checkAccessTokenAndSetAuthentication(String accessToken)throws AuthException{
+        Authentication auth = getAuthentication(accessToken);
 
-    public String getEmail(String token) {
-        return Jwts.parserBuilder() 
-            .setSigningKey(secretKey)
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .get("email", String.class); 
+        SecurityContextHolder.getContext().setAuthentication(auth);        
     }
 
-    public String getRole(String token) {
-        return Jwts.parserBuilder() 
-            .setSigningKey(secretKey)
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .get("role", String.class); 
+    public Authentication getAuthentication(String token) throws AuthException{
+        Claims claims = parseClaims(token);
+
+        List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(
+                claims.get("role").toString()));
+		
+        CustomUser principal = CustomUser.builder()
+            .memberId(claims.get("memberId", Integer.class))
+            .email(claims.get("email", String.class))
+            .platform(OAuth2PlatFormEnum.valueOf(claims.get("platform", String.class)))
+            .authorities(authorities)
+            .build();
+
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    public OAuth2PlatFormEnum getPlatForm(String token) {
-        return OAuth2PlatFormEnum.valueOf(
-            Jwts.parserBuilder() 
-            .setSigningKey(secretKey)
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .get("platform", String.class)
-        );
+    public Claims parseClaims(String token) throws AuthException {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
     }
 
-    public boolean verifyToken(String token) {
-        try {
-            Jws<Claims> claims = Jwts.parserBuilder() 
-                    .setSigningKey(secretKey) 
-                    .build()                
-                    .parseClaimsJws(token);  
-            return claims.getBody()
-                    .getExpiration()
-                    .after(new Date()); 
-        } catch (Exception e) {
-            return false; 
-        }
-    }
+
     public AuthToken getAuthToken(HttpServletRequest request){
         return AuthToken.builder()
-            .accessToken(this.getAccessToken(request))
-            .refreshToken(this.getRefreshToken(request))
+            .accessToken(this.getToken(request,accessHeader).orElse(null))
+            .refreshToken(this.getToken(request,refreshHeader).orElse(null))
             .build();
     }
 
-    public String getAccessToken(HttpServletRequest request){
-        return request.getHeader(accessHeader).replace(PREFIX, BLANK);
-    }
-
-    public String getRefreshToken(HttpServletRequest request){
-        return request.getHeader(refreshHeader).replace(PREFIX, BLANK);
+    public Optional<String> getToken(HttpServletRequest request,String tokenHeaderName){
+        return Optional.ofNullable(request.getHeader(tokenHeaderName))
+        .filter(refreshToken -> refreshToken.startsWith(PREFIX))
+        .map(refreshToken -> refreshToken.replace(PREFIX, BLANK));
     }
 
     public void setAuthTokenHeader(HttpServletResponse response, AuthToken authToken) {
-        setAccessTokenInHeader(response, authToken.getAccessToken());
-        setRefreshTokenInHeader(response, authToken.getRefreshToken());
+        setAccessTokenHeader(response, authToken.getAccessToken());
+        setRefreshTokenHeader(response, authToken.getRefreshToken());
     }
 
-    public void setAccessTokenInHeader(HttpServletResponse response, String accessToken) {
+    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
         response.setHeader(accessHeader, PREFIX + accessToken);
     }
 
-    public void setRefreshTokenInHeader(HttpServletResponse response, String refreshToken) {
+    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
         response.setHeader(refreshHeader, PREFIX + refreshToken);
     }
 

@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.team_ingterior.ingterior.member.domain.MemberDTO;
 import com.team_ingterior.ingterior.member.domain.MemberResourceResponseDTO;
 import com.team_ingterior.ingterior.member.domain.UpdateRefreshTokenDTO;
+import com.team_ingterior.ingterior.security.domain.CustomUser;
 import com.team_ingterior.ingterior.security.domain.OAuth2UserInfo;
 import com.team_ingterior.ingterior.security.enums.OAuth2PlatFormEnum;
 
@@ -24,4 +25,6 @@ public interface MemberMapper {
     void updateRefreshToken(UpdateRefreshTokenDTO data);
 
     void deleteMember(int memberId);
+
+    MemberDTO getMemberByRefreshToken(String refreshToken);
 }
